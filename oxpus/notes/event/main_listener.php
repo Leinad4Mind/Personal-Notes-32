@@ -43,7 +43,7 @@ class main_listener implements EventSubscriberInterface
 
 	/* @var \phpbb\extension\manager */
 	protected $phpbb_extension_manager;
-	
+
 	/* @var \phpbb\path_helper */
 	protected $phpbb_path_helper;
 
@@ -64,7 +64,7 @@ class main_listener implements EventSubscriberInterface
 
 	/* @var \phpbb\template\template */
 	protected $template;
-	
+
 	/* @var \phpbb\user */
 	protected $user;
 
@@ -105,7 +105,7 @@ class main_listener implements EventSubscriberInterface
 	}
 
 	public function load_language_on_setup($event)
-	{	
+	{
 		$lang_set_ext = $event['lang_set_ext'];
 		$lang_set_ext[] = array(
 			'ext_name' => 'oxpus/notes',
@@ -130,10 +130,10 @@ class main_listener implements EventSubscriberInterface
 		{
 			$ext_path					= $this->phpbb_extension_manager->get_extension_path('oxpus/notes', true);
 			$this->phpbb_path_helper	= $this->phpbb_container->get('path_helper');
-			$ext_path_web				= $this->phpbb_path_helper->update_web_root_path($ext_path);		
-	
-			$ext_main_link = $this->helper->route('notes_controller');
-	
+			$ext_path_web				= $this->phpbb_path_helper->update_web_root_path($ext_path);
+
+			$ext_main_link = $this->helper->route('oxpus_notes_controller');
+
 			if ($this->user->data['user_popup_notes'])
 			{
 				$u_notes_path	= "javascript:notes()";
@@ -144,11 +144,11 @@ class main_listener implements EventSubscriberInterface
 				$u_notes_path	= $ext_main_link;
 				$u_notes_popup	= '';
 			}
-	
+
 			$cur_time = time();
-	
+
 			$this->db->return_on_error = true;
-			$sql = 'SELECT COUNT(note_id) AS total FROM ' . $this->table_prefix . 'notes 
+			$sql = 'SELECT COUNT(note_id) AS total FROM ' . $this->table_prefix . 'notes
 				WHERE note_user_id = ' . (int) $this->user->data['user_id'] . '
 					AND note_mem <= ' . (int) $cur_time . '
 					AND note_mem <> 0
@@ -157,18 +157,18 @@ class main_listener implements EventSubscriberInterface
 			$total_note_mems = $this->db->sql_fetchfield('total');
 			$this->db->sql_freeresult($result);
 			$this->db->return_on_error = false;
-		
+
 			if ($total_note_mems)
 			{
-				$u_notes_path = (!$this->user->data['user_popup_notes']) ? $this->helper->route('notes_controller', array('mem_drop' => 1, 'mem_time' => $cur_time)) : $u_notes_path;
-				$u_notes_popup = ($this->user->data['user_popup_notes']) ? $this->helper->route('notes_controller', array('mem_drop' => 1, 'mem_time' => $cur_time)) : '';
-		
+				$u_notes_path = (!$this->user->data['user_popup_notes']) ? $this->helper->route('oxpus_notes_controller', array('mem_drop' => 1, 'mem_time' => $cur_time)) : $u_notes_path;
+				$u_notes_popup = ($this->user->data['user_popup_notes']) ? $this->helper->route('oxpus_notes_controller', array('mem_drop' => 1, 'mem_time' => $cur_time)) : '';
+
 				$this->template->assign_var('S_NOTES_MEM', true);
 				$this->template->assign_vars(array(
 					'NOTES_MEM'		=> $this->language->lang('NOTES_MEMTEXT', '<a href="' . $u_notes_path . '">', '</a>'),
 				));
 			}
-	
+
 			$this->template->assign_vars(array(
 				'U_NOTES_PATH'	=> $u_notes_path,
 				'U_NOTES_POPUP'	=> ($this->user->data['user_popup_notes']) ? str_replace('&amp;', '&', $u_notes_popup) : $u_notes_popup,
@@ -180,7 +180,7 @@ class main_listener implements EventSubscriberInterface
 	{
 		if ($event['row']['session_page'] === 'app.php/notes' || $event['row']['session_page'] === 'app.' . $this->php_ext . '/notes.php')
 		{
-			$ext_link = $this->helper->route('notes_controller');
+			$ext_link = $this->helper->route('oxpus_notes_controller');
 
 			$event['location'] = $this->language->lang('NOTES');
 			$event['location_url'] = $ext_link;
